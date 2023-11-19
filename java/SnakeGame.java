@@ -1,4 +1,4 @@
-package com.gamecodeschool.c17snake;
+package com.gamecodeschool.snakeproject;
 
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
@@ -29,11 +29,16 @@ class SnakeGame extends SurfaceView implements Runnable{
     // for playing sound effects
     private SoundPool mSP;
     private int mEat_ID = -1;
+
+    private int mBomb_ID = -1;
     private int mCrashID = -1;
 
     // The size in segments of the playable area
     private final int NUM_BLOCKS_WIDE = 40;
     private int mNumBlocksHigh;
+    void setBlocksHigh(int newBlocksHigh) {
+        mNumBlocksHigh = newBlocksHigh;
+    }
 
     // How many points does the player have
     private int mScore;
@@ -47,6 +52,12 @@ class SnakeGame extends SurfaceView implements Runnable{
     private Snake mSnake;
     // And an apple
     private Apple mApple;
+
+    //Add an orange
+    private Orange mOrange;
+
+    //Add le bomba
+    private Bomb mBomb;
 
 
     // This is the constructor method that gets called
@@ -81,6 +92,9 @@ class SnakeGame extends SurfaceView implements Runnable{
             descriptor = assetManager.openFd("get_apple.ogg");
             mEat_ID = mSP.load(descriptor, 0);
 
+            descriptor = assetManager.openFd("bomb.wav");
+            mBomb_ID = mSP.load(descriptor, 0);
+
             descriptor = assetManager.openFd("snake_death.ogg");
             mCrashID = mSP.load(descriptor, 0);
 
@@ -94,6 +108,16 @@ class SnakeGame extends SurfaceView implements Runnable{
 
         // Call the constructors of our two game objects
         mApple = new Apple(context,
+                new Point(NUM_BLOCKS_WIDE,
+                        mNumBlocksHigh),
+                blockSize);
+
+        mOrange = new Orange(context,
+                new Point(NUM_BLOCKS_WIDE,
+                        mNumBlocksHigh),
+                blockSize);
+
+        mBomb = new Bomb(context,
                 new Point(NUM_BLOCKS_WIDE,
                         mNumBlocksHigh),
                 blockSize);
@@ -112,8 +136,13 @@ class SnakeGame extends SurfaceView implements Runnable{
         // reset the snake
         mSnake.reset(NUM_BLOCKS_WIDE, mNumBlocksHigh);
 
-        // Get the apple ready for dinner
+        // Get the fruit ready for dinner
         mApple.spawn();
+
+        mOrange.spawn();
+
+        //Le bomba
+        mBomb.spawn();
 
         // Reset the mScore
         mScore = 0;
@@ -183,6 +212,28 @@ class SnakeGame extends SurfaceView implements Runnable{
             mSP.play(mEat_ID, 1, 1, 0, 0, 1);
         }
 
+        // Did the head of the snake eat the orange?
+        if(mSnake.checkDinner(mOrange.getLocation())){
+            mOrange.spawn();
+
+            // Add to  mScore
+            mScore = mScore + 2;
+
+            // Play a sound
+            mSP.play(mEat_ID, 1, 1, 0, 0, 1);
+        }
+
+        // Did the head of the snake eat the bomb?
+        if(mSnake.checkDinner(mBomb.getLocation())){
+            mBomb.spawn();
+
+            // Add to  mScore
+            mScore = mScore - 1;
+
+            // Play a sound
+            mSP.play(mBomb_ID, 1, 1, 0, 0, 1);
+        }
+
         // Did the snake die?
         if (mSnake.detectDeath()) {
             // Pause the game ready to start again
@@ -210,8 +261,10 @@ class SnakeGame extends SurfaceView implements Runnable{
             // Draw the score
             mCanvas.drawText("" + mScore, 20, 120, mPaint);
 
-            // Draw the apple and the snake
+            // Draw the fruit and the snake
             mApple.draw(mCanvas, mPaint);
+            mOrange.draw(mCanvas, mPaint);
+            mBomb.draw(mCanvas, mPaint);
             mSnake.draw(mCanvas, mPaint);
 
             // Draw some text while paused
@@ -224,9 +277,9 @@ class SnakeGame extends SurfaceView implements Runnable{
                 // Draw the message
                 // We will give this an international upgrade soon
                 //mCanvas.drawText("Tap To Play!", 200, 700, mPaint);
-                mCanvas.drawText(getResources().
+                /*mCanvas.drawText(getResources().
                                 getString(R.string.tap_to_play),
-                        200, 700, mPaint);
+                        200, 700, mPaint); */
             }
 
 
