@@ -16,7 +16,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import java.io.IOException;
 
-class SnakeGame extends SurfaceView implements Runnable{
+class SnakeGame extends SurfaceView implements Runnable, Audio {
 
     // Objects for the game loop/thread
     private Thread mThread = null;
@@ -70,6 +70,7 @@ class SnakeGame extends SurfaceView implements Runnable{
                 new Point(NUM_BLOCKS_WIDE,
                         mNumBlocksHigh),
                 blockSize);
+        gameTimer = new Timer();
 
     }
     private void initializeDrawingObjects() {
@@ -93,6 +94,7 @@ class SnakeGame extends SurfaceView implements Runnable{
 
         // Setup mNextFrameTime so an update can triggered
         mNextFrameTime = System.currentTimeMillis();
+        gameTimer.reset();
     }
 
 
@@ -106,11 +108,21 @@ class SnakeGame extends SurfaceView implements Runnable{
                     update();
                 }
             }
-
             draw();
         }
     }
 
+    @Override
+    public void play() {
+        // Check the game state and play the appropriate sound
+        if (mSnake.checkDinner(mApple.getLocation())) {
+            // Snake ate the apple
+            mSoundManager.playEatSound();
+        } else if (mSnake.detectDeath()) {
+            // Snake crashed
+            mSoundManager.playCrashSound();
+        }
+    }
 
     // Check to see if it is time for an update
     public boolean updateRequired() {
@@ -157,10 +169,17 @@ class SnakeGame extends SurfaceView implements Runnable{
         if (mSnake.detectDeath()) {
             mSoundManager.playCrashSound();
             mPaused =true;
+            gameTimer.stop();
         }
-
     }
 
+    // Helper method to format time in MM:SS format
+    private String formatTime(long elapsedTime) {
+        int seconds = (int) (elapsedTime / 1000);
+        int minutes = seconds / 60;
+        seconds = seconds % 60;
+        return String.format("%02d:%02d", minutes, seconds);
+    }
 
     // Do all the drawing
     public void draw() {
@@ -178,6 +197,9 @@ class SnakeGame extends SurfaceView implements Runnable{
             // Draw the score
             mCanvas.drawText("" + mScore, 20, 120, mPaint);
 
+            // Draw the elapsed time
+            mCanvas.drawText("Time: " + formatTime(gameTimer.getElapsedTime()), mCanvas.getWidth() - 650, 120, mPaint);
+        
             // Draw the apple and the snake
             mApple.draw(mCanvas, mPaint);
             mSnake.draw(mCanvas, mPaint);
@@ -194,7 +216,6 @@ class SnakeGame extends SurfaceView implements Runnable{
                 mCanvas.drawText("Tap To Play!", 200, 700, mPaint);
             }
 
-
             // Unlock the mCanvas and reveal the graphics for this frame
             mSurfaceHolder.unlockCanvasAndPost(mCanvas);
         }
@@ -207,7 +228,7 @@ class SnakeGame extends SurfaceView implements Runnable{
                 if (mPaused) {
                     mPaused = false;
                     newGame();
-
+                    gameTimer.start(); // Start the timer when unpausing
                     // Don't want to process snake direction for this tap
                     return true;
                 }
@@ -232,6 +253,7 @@ class SnakeGame extends SurfaceView implements Runnable{
         } catch (InterruptedException e) {
             // Error
         }
+        gameTimer.stop();
     }
 
 
@@ -239,6 +261,10 @@ class SnakeGame extends SurfaceView implements Runnable{
     public void resume() {
         mPlaying = true;
         mThread = new Thread(this);
+        if (!mPaused) {
+            mNextFrameTime = System.currentTimeMillis();
+            gameTimer.start();
+        }
         mThread.start();
     }
 }
