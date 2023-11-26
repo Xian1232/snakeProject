@@ -56,7 +56,11 @@ class Snake {
         // The halfway point across the screen in pixels
         // Used to detect which side of screen was pressed
         halfWayPoint = mr.x * ss / 2;
+        initializeBitmaps(context);
+        
+    }
 
+    private void initializeBitmaps(Context context) {
         // Create and scale the bitmaps
         mBitmapHeadRight = BitmapFactory
                 .decodeResource(context.getResources(),
@@ -79,7 +83,7 @@ class Snake {
         // in the correct direction
         mBitmapHeadRight = Bitmap
                 .createScaledBitmap(mBitmapHeadRight,
-                        ss, ss, false);
+                        mSegmentSize, mSegmentSize, false);
 
         // A matrix for scaling
         Matrix matrix = new Matrix();
@@ -87,20 +91,20 @@ class Snake {
 
         mBitmapHeadLeft = Bitmap
                 .createBitmap(mBitmapHeadRight,
-                        0, 0, ss, ss, matrix, true);
+                        0, 0, mSegmentSize, mSegmentSize, matrix, true);
 
         // A matrix for rotating
         matrix.preRotate(-90);
         mBitmapHeadUp = Bitmap
                 .createBitmap(mBitmapHeadRight,
-                        0, 0, ss, ss, matrix, true);
+                        0, 0, mSegmentSize, mSegmentSize, matrix, true);
 
         // Matrix operations are cumulative
         // so rotate by 180 to face down
         matrix.preRotate(180);
         mBitmapHeadDown = Bitmap
                 .createBitmap(mBitmapHeadRight,
-                        0, 0, ss, ss, matrix, true);
+                        0, 0, mSegmentSize, mSegmentSize, matrix, true);
 
         // Create and scale the body
         mBitmapBody = BitmapFactory
@@ -109,13 +113,11 @@ class Snake {
 
         mBitmapBody = Bitmap
                 .createScaledBitmap(mBitmapBody,
-                        ss, ss, false);
-
-
+                        mSegmentSize, mSegmentSize, false);
     }
 
     // Get the snake ready for a new game
-    void reset(int w, int h) {
+    void reset(int width, int height) {
 
         // Reset the heading
         heading = Heading.RIGHT;
@@ -124,7 +126,7 @@ class Snake {
         segmentLocations.clear();
 
         // Start with a single snake segment
-        segmentLocations.add(new Point(w / 2, h / 2));
+        segmentLocations.add(new Point(width / 2, height / 2));
     }
 
 
@@ -143,34 +145,33 @@ class Snake {
         // Move the head in the appropriate heading
         // Get the existing head position
         Point p = segmentLocations.get(0);
+        moveHead(head);
+    }
 
+    private void moveHead(Point head) {
         // Move it appropriately
         switch (heading) {
             case UP:
-                p.y--;
+                head.y--;
                 break;
 
             case RIGHT:
-                p.x++;
+                head.x++;
                 break;
 
             case DOWN:
-                p.y++;
+                head.y++;
                 break;
 
             case LEFT:
-                p.x--;
+                head.x--;
                 break;
         }
-
     }
 
     boolean detectDeath() {
         // Has the snake died?
-        if(hitScreenEdge() || hitItself()){
-            return true;
-        }
-        return false;
+        return hitScreenEdge() || hitItself();
     }
     private boolean hitScreenEdge() {
         // Hit any of the screen edges
@@ -214,40 +215,44 @@ class Snake {
             // All the code from this method goes here
             // Draw the head
             Point head = segmentLocations.get(0);
-            switch (heading) {
-                case RIGHT:
-                    canvas.drawBitmap(mBitmapHeadRight,
-                            head.x
-                                    * mSegmentSize,
-                            head.y
-                                    * mSegmentSize, paint);
-                    break;
-
-                case LEFT:
-                    canvas.drawBitmap(mBitmapHeadLeft,
-                            head.x
-                                    * mSegmentSize,
-                            head.y
-                                    * mSegmentSize, paint);
-                    break;
-
-                case UP:
-                    canvas.drawBitmap(mBitmapHeadUp,
-                            head.x
-                                    * mSegmentSize,
-                            head.y
-                                    * mSegmentSize, paint);
-                    break;
-
-                case DOWN:
-                    canvas.drawBitmap(mBitmapHeadDown,
-                            head.x
-                                    * mSegmentSize,
-                            head.y
-                                    * mSegmentSize, paint);
-                    break;
-            }
+            drawHead(canvas, paint, head);
             drawBody(canvas, paint);
+        }
+    }
+
+    private void drawHead(Canvas canvas, Paint paint, Point head) {
+        switch (heading) {
+            case RIGHT:
+                canvas.drawBitmap(mBitmapHeadRight,
+                        head.x
+                                * mSegmentSize,
+                        head.y
+                                * mSegmentSize, paint);
+                break;
+
+            case LEFT:
+                canvas.drawBitmap(mBitmapHeadLeft,
+                        head.x
+                                * mSegmentSize,
+                        head.y
+                                * mSegmentSize, paint);
+                break;
+
+            case UP:
+                canvas.drawBitmap(mBitmapHeadUp,
+                        head.x
+                                * mSegmentSize,
+                        head.y
+                                * mSegmentSize, paint);
+                break;
+
+            case DOWN:
+                canvas.drawBitmap(mBitmapHeadDown,
+                        head.x
+                                * mSegmentSize,
+                        head.y
+                                * mSegmentSize, paint);
+                break;
         }
     }
 
@@ -269,38 +274,45 @@ class Snake {
 
         // Is the tap on the right hand side?
         if (motionEvent.getX() >= halfWayPoint) {
-            switch (heading) {
-                // Rotate right
-                case UP:
-                    heading = Heading.RIGHT;
-                    break;
-                case RIGHT:
-                    heading = Heading.DOWN;
-                    break;
-                case DOWN:
-                    heading = Heading.LEFT;
-                    break;
-                case LEFT:
-                    heading = Heading.UP;
-                    break;
-
-            }
+            rotateRight();
         } else {
-            // Rotate left
-            switch (heading) {
-                case UP:
-                    heading = Heading.LEFT;
-                    break;
-                case LEFT:
-                    heading = Heading.DOWN;
-                    break;
-                case DOWN:
-                    heading = Heading.RIGHT;
-                    break;
-                case RIGHT:
-                    heading = Heading.UP;
-                    break;
-            }
+            rotateLeft();
+        }
+    }
+
+    private void rotateRight() {
+        switch (heading) {
+            // Rotate right
+            case UP:
+                heading = Heading.RIGHT;
+                break;
+            case RIGHT:
+                heading = Heading.DOWN;
+                break;
+            case DOWN:
+                heading = Heading.LEFT;
+                break;
+            case LEFT:
+                heading = Heading.UP;
+                break;
+        }
+    }
+
+    private void rotateLeft() {
+        // Rotate left
+        switch (heading) {
+            case UP:
+                heading = Heading.LEFT;
+                break;
+            case LEFT:
+                heading = Heading.DOWN;
+                break;
+            case DOWN:
+                heading = Heading.RIGHT;
+                break;
+            case RIGHT:
+                heading = Heading.UP;
+                break;
         }
     }
 }
