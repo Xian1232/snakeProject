@@ -9,12 +9,61 @@ import android.media.SoundPool;
 import android.os.Build;
 import java.io.IOException;
 
+interface Audio {
+    void play();
+}
+
+class EatSound implements Audio {
+    private final SoundPool soundPool;
+    private final int soundId;
+
+    EatSound(SoundPool soundPool, int soundId) {
+        this.soundPool = soundPool;
+        this.soundId = soundId;
+    }
+
+    @Override
+    public void play() {
+        soundPool.play(soundId, 1, 1, 0, 0, 1);
+    }
+}
+
+class CrashSound implements Audio {
+    private final SoundPool soundPool;
+    private final int soundId;
+
+    CrashSound(SoundPool soundPool, int soundId) {
+        this.soundPool = soundPool;
+        this.soundId = soundId;
+    }
+
+    @Override
+    public void play() {
+        soundPool.play(soundId, 1, 1, 0, 0, 1);
+    }
+}
+
+class AudioContext {
+    private Audio audio;
+
+    void setAudio(Audio audio) {
+        this.audio = audio;
+    }
+
+    void playAudio() {
+        if (audio != null) {
+            audio.play();
+        }
+    }
+}
+
 public class SoundManager {
 
     // for playing sound effects
-    private SoundPool mSP;
-    private int mEat_ID = -1;
-    private int mCrashID = -1;
+    private SoundPool soundPool;
+    private int eatSoundId = -1;
+    private int crashSoundId = -1;
+    private AudioContext audioContext;
 
     SoundManager(Context context) {
         initializeSoundPool(context);
@@ -33,12 +82,12 @@ public class SoundManager {
                     .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                     .build();
 
-            mSP = new SoundPool.Builder()
+            soundPool = new SoundPool.Builder()
                     .setMaxStreams(5)
                     .setAudioAttributes(audioAttributes)
                     .build();
         } else {
-            mSP = new SoundPool(5, AudioManager.STREAM_MUSIC, 0);
+            soundPool = new SoundPool(5, AudioManager.STREAM_MUSIC, 0);
         }
     }
 
@@ -48,19 +97,21 @@ public class SoundManager {
 
         // Prepare the sounds in memory
         descriptor = assetManager.openFd("get_apple.ogg");
-        mEat_ID = mSP.load(descriptor, 0);
+        eatSoundId = soundPool.load(descriptor, 0);
 
         descriptor = assetManager.openFd("snake_death.ogg");
-        mCrashID = mSP.load(descriptor, 0);
+        crashSoundId = soundPool.load(descriptor, 0);
     }
 
     void playEatSound() {
         // Play a sound
-        mSP.play(mEat_ID, 1, 1, 0, 0, 1);
+        audioContext.setAudio(new EatSound(soundPool, eatSoundId));
+        audioContext.playAudio();
     }
 
     void playCrashSound() {
         // Pause the game ready to start again
-        mSP.play(mCrashID, 1, 1, 0, 0, 1);
+        audioContext.setAudio(new CrashSound(soundPool, crashSoundId));
+        audioContext.playAudio();
     }
 }
