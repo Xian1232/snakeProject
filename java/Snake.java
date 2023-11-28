@@ -1,4 +1,4 @@
-package com.gamecodeschool.c17snake;
+package com.gamecodeschool.snake;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -24,7 +24,7 @@ class Snake {
 
     // Where is the centre of the screen
     // horizontally in pixels?
-    private int halfWayPoint;
+    private static int halfWayPoint;
 
     // For tracking movement Heading
     private enum Heading {
@@ -32,7 +32,7 @@ class Snake {
     }
 
     // Start by heading to the right
-    private Heading heading = Heading.RIGHT;
+    private static Heading heading = Heading.RIGHT;
 
     // A bitmap for each direction the head can face
     private Bitmap mBitmapHeadRight;
@@ -258,7 +258,7 @@ class Snake {
 
 
     // Handle changing direction
-    void switchHeading(MotionEvent motionEvent) {
+    static void switchHeading(MotionEvent motionEvent) {
 
         // Is the tap on the right hand side?
         if (motionEvent.getX() >= halfWayPoint) {
