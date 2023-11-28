@@ -1,5 +1,3 @@
-package com.gamecodeschool.c17snake;
-
 import android.app.Activity;
 import android.graphics.Point;
 import android.os.Bundle;
@@ -38,6 +36,11 @@ public class SnakeActivity extends Activity {
 
     // Stop the thread in snakeEngine
     @Override
+    protected void onPause() {
+        super.onPause();
+        mSnakeGame.pause();
+    }
+
     protected void onPause() {
         super.onPause();
         mSnakeGame.pause();
