@@ -1,4 +1,4 @@
-package com.gamecodeschool.c17snake;
+package com.gamecodeschool.snakegame;
 
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
@@ -32,7 +32,7 @@ class SnakeGame extends SurfaceView implements Runnable{
     private int mCrashID = -1;
 
     // The size in segments of the playable area
-    private final int NUM_BLOCKS_WIDE = 40;
+    private final int NUM_BLOCKS_WIDE = 16;
     private int mNumBlocksHigh;
 
     // How many points does the player have
@@ -44,7 +44,7 @@ class SnakeGame extends SurfaceView implements Runnable{
     private Paint mPaint;
 
     // A snake ssss
-    private Snake mSnake;
+    private Snake_Head mSnakeHead;
     // And an apple
     private Apple mApple;
 
@@ -98,7 +98,7 @@ class SnakeGame extends SurfaceView implements Runnable{
                         mNumBlocksHigh),
                 blockSize);
 
-        mSnake = new Snake(context,
+        mSnakeHead = new Snake_Head(context,
                 new Point(NUM_BLOCKS_WIDE,
                         mNumBlocksHigh),
                 blockSize);
@@ -110,7 +110,7 @@ class SnakeGame extends SurfaceView implements Runnable{
     public void newGame() {
 
         // reset the snake
-        mSnake.reset(NUM_BLOCKS_WIDE, mNumBlocksHigh);
+        mSnakeHead.reset(NUM_BLOCKS_WIDE, mNumBlocksHigh);
 
         // Get the apple ready for dinner
         mApple.spawn();
@@ -143,7 +143,7 @@ class SnakeGame extends SurfaceView implements Runnable{
     public boolean updateRequired() {
 
         // Run at 10 frames per second
-        final long TARGET_FPS = 10;
+        final long TARGET_FPS = 13;
         // There are 1000 milliseconds in a second
         final long MILLIS_PER_SECOND = 1000;
 
@@ -168,10 +168,10 @@ class SnakeGame extends SurfaceView implements Runnable{
     public void update() {
 
         // Move the snake
-        mSnake.move();
+        mSnakeHead.move();
 
         // Did the head of the snake eat the apple?
-        if(mSnake.checkDinner(mApple.getLocation())){
+        if(mSnakeHead.checkDinner(mApple.getLocation())){
             // This reminds me of Edge of Tomorrow.
             // One day the apple will be ready!
             mApple.spawn();
@@ -184,7 +184,7 @@ class SnakeGame extends SurfaceView implements Runnable{
         }
 
         // Did the snake die?
-        if (mSnake.detectDeath()) {
+        if (mSnakeHead.detectDeath()) {
             // Pause the game ready to start again
             mSP.play(mCrashID, 1, 1, 0, 0, 1);
 
@@ -201,7 +201,7 @@ class SnakeGame extends SurfaceView implements Runnable{
             mCanvas = mSurfaceHolder.lockCanvas();
 
             // Fill the screen with a color
-            mCanvas.drawColor(Color.argb(255, 26, 128, 182));
+            mCanvas.drawColor(Color.argb(255, 0, 128, 0));
 
             // Set the size and color of the mPaint for the text
             mPaint.setColor(Color.argb(255, 255, 255, 255));
@@ -212,21 +212,18 @@ class SnakeGame extends SurfaceView implements Runnable{
 
             // Draw the apple and the snake
             mApple.draw(mCanvas, mPaint);
-            mSnake.draw(mCanvas, mPaint);
+            mSnakeHead.draw(mCanvas, mPaint);
 
             // Draw some text while paused
             if(mPaused){
 
                 // Set the size and color of the mPaint for the text
                 mPaint.setColor(Color.argb(255, 255, 255, 255));
-                mPaint.setTextSize(250);
+                mPaint.setTextSize(100);
 
                 // Draw the message
                 // We will give this an international upgrade soon
-                //mCanvas.drawText("Tap To Play!", 200, 700, mPaint);
-                mCanvas.drawText(getResources().
-                                getString(R.string.tap_to_play),
-                        200, 700, mPaint);
+                mCanvas.drawText("Tap To Play!", 200, 700, mPaint);
             }
 
 
@@ -248,7 +245,7 @@ class SnakeGame extends SurfaceView implements Runnable{
                 }
 
                 // Let the Snake class handle the input
-                mSnake.switchHeading(motionEvent);
+                mSnakeHead.switchHeading(motionEvent);
                 break;
 
             default:
