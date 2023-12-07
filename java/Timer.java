@@ -7,9 +7,10 @@ public class Timer {
     private long startTime;
     private boolean isRunning;
     private long elapsedTimePaused;
-
     private Handler handler;
     private Runnable runnable;
+    private long timeOfDeath;
+
 
     public Timer() {
         startTime = 0;
@@ -44,24 +45,40 @@ public class Timer {
         }
     }
 
+
     public void pause() {
         if (isRunning) {
             stop();
-            elapsedTimePaused += System.currentTimeMillis() - startTime;
+            elapsedTimePaused = System.currentTimeMillis() - startTime;
         }
     }
 
+    public void resume() {
+        if (!isRunning) {
+            startTime = System.currentTimeMillis() - elapsedTimePaused;
+            isRunning = true;
+            handler.post(runnable);
+        }
+    }
+
+    public void die() {
+        timeOfDeath = System.currentTimeMillis();
+    }
 
     public long getElapsedTime() {
         if (isRunning) {
             return System.currentTimeMillis() - startTime;
+        } else if (timeOfDeath > 0) {
+            return timeOfDeath - startTime;
         } else {
-            return 0;
+            return elapsedTimePaused;
         }
     }
 
     public void reset() {
         startTime = 0;
         isRunning = false;
+        elapsedTimePaused = 0;
+        timeOfDeath = 0;
     }
 }
