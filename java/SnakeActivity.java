@@ -1,3 +1,5 @@
+package com.gamecodeschool.snake;
+
 import android.app.Activity;
 import android.graphics.Point;
 import android.os.Bundle;
@@ -5,9 +7,9 @@ import android.view.Display;
 
 public class SnakeActivity extends Activity {
 
+
     // Declare an instance of SnakeGame
     SnakeGame mSnakeGame;
-
     // Set the game up
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,7 +23,7 @@ public class SnakeActivity extends Activity {
         display.getSize(size);
 
         // Create a new instance of the SnakeEngine class
-        mSnakeGame = new SnakeGame(this, size);
+        mSnakeGame = new SnakeGame(size,this,this);
 
         // Make snakeEngine the view of the Activity
         setContentView(mSnakeGame);
@@ -36,11 +38,6 @@ public class SnakeActivity extends Activity {
 
     // Stop the thread in snakeEngine
     @Override
-    protected void onPause() {
-        super.onPause();
-        mSnakeGame.pause();
-    }
-
     protected void onPause() {
         super.onPause();
         mSnakeGame.pause();
