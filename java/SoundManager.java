@@ -62,6 +62,21 @@ class BombSound implements Audio {
     }
 }
 
+class ClockSound implements Audio {
+    private final SoundPool soundPool;
+    private final int soundId;
+
+    ClockSound(SoundPool soundPool, int soundId) {
+        this.soundPool = soundPool;
+        this.soundId = soundId;
+    }
+
+    @Override
+    public void play() {
+        soundPool.play(soundId, 1, 1, 0, 0, 1);
+    }
+}
+
 // Context for Audio, allows switching between different audio implementations
 class AudioContext {
     private Audio audio;
@@ -82,6 +97,8 @@ public class SoundManager {
     private SoundPool soundPool;
     private int eatSoundId = -1;
     private int bombId = -1;
+    private int clockId = -1;
+    private int starId = -1;
 
     private int crashSoundId = -1;
     private AudioContext audioContext;
@@ -129,6 +146,12 @@ public class SoundManager {
 
         descriptor = assetManager.openFd("snake_death.ogg");
         crashSoundId = soundPool.load(descriptor, 0);
+
+        descriptor = assetManager.openFd("ClockSound.ogg");
+        clockId = soundPool.load(descriptor, 0);
+
+        descriptor = assetManager.openFd("StarSound.ogg");
+        starId = soundPool.load(descriptor, 0);
     }
 
     void playEatSound() {
@@ -143,6 +166,16 @@ public class SoundManager {
 
     void playBombSound() {
         audioContext.setAudio(new BombSound(soundPool, crashSoundId));
+        audioContext.playAudio();
+    }
+
+    void playClockSound() {
+        audioContext.setAudio(new ClockSound(soundPool, crashSoundId));
+        audioContext.playAudio();
+    }
+
+    void playStarSound() {
+        audioContext.setAudio(new EatSound(soundPool, crashSoundId));
         audioContext.playAudio();
     }
 }

@@ -17,16 +17,20 @@ public class GameObjectFactory {
     public Apple createApple() {
         return new Apple(context, gridSize, blockSize);
     }
-
     public Snake createSnake() {
         return new Snake(context, gridSize, blockSize);
     }
-
     public Orange createOrange() {
         return new Orange(context, gridSize, blockSize);
     }
-
-    public Bomb createBomb() {
-        return new Bomb(context, gridSize, blockSize);
+    public Bomb createBomb() {return new Bomb(context, gridSize, blockSize);}
+    public Clock createClock() {
+        return new Clock(context, gridSize, blockSize);
+    }
+    public Star createStar() {
+        return new Star(context, gridSize, blockSize);
+    }
+    public Obstacle createObstacle() {
+        return new Obstacle(context, gridSize, blockSize);
     }
 }

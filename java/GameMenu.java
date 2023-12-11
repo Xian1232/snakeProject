@@ -117,7 +117,6 @@ public class GameMenu {
             this.hasBackground = hasBackground;
         }
 
-
         public void draw(Canvas canvas, Paint paint, float buttonWidth, float buttonHeight) {
             if (hasBackground) {
                 paint.setColor(Color.argb(100, 20, 240, 0));
@@ -128,6 +127,7 @@ public class GameMenu {
                 RectF rect = new RectF(left, top, right, bottom);
 
                 // Draw button background
+                canvas.drawRoundRect(rect, 10, 10, paint);
             }
 
             // Draw button text

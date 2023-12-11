@@ -31,6 +31,8 @@ class Snake {
         UP, RIGHT, DOWN, LEFT
     }
 
+    private Obstacle mObstacle;
+
     // Start by heading to the right
     private Heading heading = Heading.RIGHT;
 
@@ -145,6 +147,8 @@ class Snake {
         // Move the head in the appropriate heading
         // Get the existing head position
         Point p = segmentLocations.get(0);
+
+        // Move it appropriately
         switch (heading) {
             case UP:
                 p.y--;
@@ -162,11 +166,50 @@ class Snake {
                 p.x--;
                 break;
         }
+
     }
 
-    boolean detectDeath() {
+    void reverseMove() {
+        // Move the body
+        // Start at the back and move it
+        // to the position of the segment in front of it
+        for (int i = segmentLocations.size() - 1; i > 0; i--) {
+
+            // Make it the same value as the next segment
+            // going forwards towards the head
+            segmentLocations.get(i).x = segmentLocations.get(i - 1).x;
+            segmentLocations.get(i).y = segmentLocations.get(i - 1).y;
+        }
+
+        // Move the head in the appropriate heading
+        // Get the existing head position
+        Point p = segmentLocations.get(0);
+
+        // Move it appropriately
+        switch (heading) {
+            case UP:
+                p.y++;
+                break;
+
+            case RIGHT:
+                p.x--;
+                break;
+
+            case DOWN:
+                p.y--;
+                break;
+
+            case LEFT:
+                p.x++;
+                break;
+        }
+
+    }
+
+
+    boolean detectDeath(Point oB) {
         // Has the snake died?
-        return hitScreenEdge() || hitItself();
+        return hitScreenEdge() || hitItself() || checkObstacle(oB);
     }
     private boolean hitScreenEdge() {
         // Hit any of the screen edges
@@ -187,7 +230,7 @@ class Snake {
         return false;
     }
 
-    boolean checkApple(Point l) {
+    boolean checkDinner(Point l) {
         //if (snakeXs[0] == l.x && snakeYs[0] == l.y) {
         if (segmentLocations.get(0).x == l.x &&
                 segmentLocations.get(0).y == l.y) {
@@ -203,16 +246,10 @@ class Snake {
         return false;
     }
 
-    boolean checkOrange(Point l) {
-        //if (snakeXs[0] == l.x && snakeYs[0] == l.y) {
-        if (segmentLocations.get(0).x == l.x &&
-                segmentLocations.get(0).y == l.y) {
-
-            // Add a new Point to the list
-            // located off-screen.
-            // This is OK because on the next call to
-            // move it will take the position of
-            // the segment in front of it
+    boolean checkOrange(Point o) {
+        // Same as checkDinner
+        if (segmentLocations.get(0).x == o.x &&
+                segmentLocations.get(0).y == o.y) {
             segmentLocations.add(new Point(-10, -10));
             segmentLocations.add(new Point(-10, -10));
             return true;
@@ -221,18 +258,25 @@ class Snake {
     }
 
     boolean checkBomb(Point b) {
-        //if (snakeXs[0] == l.x && snakeYs[0] == l.y) {
         if (segmentLocations.get(0).x == b.x &&
                 segmentLocations.get(0).y == b.y) {
+            // Removes a segment when eaten
+            segmentLocations.remove(0);
+            return true;
+        }
+        return false;
+    }
 
-            // Will not add a new segment if bomb is eaten
+    boolean checkObstacle(Point oB) {
+
+        if (segmentLocations.get(0).x == oB.x &&
+                segmentLocations.get(0).y == oB.y) {
             return true;
         }
         return false;
     }
 
     void draw(Canvas canvas, Paint paint) {
-
         // Don't run this code if ArrayList has nothing in it
         if (!segmentLocations.isEmpty()) {
             // All the code from this method goes here
