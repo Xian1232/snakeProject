@@ -64,16 +64,17 @@ public class GameMenu {
     }
     private void initializeAchievements() {
         if (!achievementsInitialized) {
-            
+
             String highScoreName = context.getResources().getString(R.string.achievement_high_score);
             String highScoreDesc = context.getResources().getString(R.string.achievement_5_score_desc);
-
+            String highScorerName = context.getResources().getString(R.string.achievement_high_scorer);
+            String highScorerDesc = context.getResources().getString(R.string.achievement_10_score_desc);
             // Create an Achievement object with the retrieved strings
             Achievement highScoreAchievement = new Achievement("high_score", highScoreName, highScoreDesc);
-
+            Achievement highScorerAchievement = new Achievement("high_scorer", highScorerName, highScorerDesc);
             // Add the achievement to the list
             achievements.add(highScoreAchievement);
-
+            achievements.add(highScorerAchievement);
             // Add additional achievements as needed
 
 
@@ -81,17 +82,17 @@ public class GameMenu {
         }
     }
     private void drawAchievements(Canvas canvas) {
-        float boxWidth = screenSize.x - 2 * margin; 
-        float boxHeight = screenSize.y / 2; 
+        float boxWidth = screenSize.x - 2 * margin;
+        float boxHeight = screenSize.y / 2;
         float left = margin;
-        float top = screenSize.y / 4; 
+        float top = screenSize.y / 4;
         float right = screenSize.x - margin;
         float bottom = top + boxHeight;
 
         // Draw the achievements box background
-        paint.setColor(Color.argb(255, 0, 128, 0)); 
+        paint.setColor(Color.argb(255, 0, 128, 0));
         RectF rect = new RectF(left, top, right, bottom);
-        canvas.drawRoundRect(rect, 25, 25, paint); 
+        canvas.drawRoundRect(rect, 25, 25, paint);
 
         // Set up paint for the text
         paint.setColor(Color.WHITE);
@@ -103,12 +104,13 @@ public class GameMenu {
 
         // Draw the title for the achievements section
         canvas.drawText("Achievements", screenSize.x / 2, textY, paint);
-        textY += paint.getTextSize() * 1.5; 
+        textY += paint.getTextSize() * 1.5;
 
         // Draw each achievement
         for (Achievement achievement : achievements) {
-            String achievementText = achievement.getName() + " - " +
-                    (achievement.isUnlocked() ? "Unlocked" : "Locked");
+            String achievementText = achievement.getName() + " - " + achievement.getDescription()
+                  +"_" + (achievement.isUnlocked() ? "Unlocked" : "Locked");
+
             canvas.drawText(achievementText, screenSize.x / 2, textY, paint);
             textY += paint.getTextSize() * 1.5; // Increment y position for the next achievement
         }
@@ -182,7 +184,8 @@ public class GameMenu {
         // Check if the achievements button is touched
         if (!isAchievementButtonClicked && achievementButton.isTouched(x, y)) {
             // Toggle the display of achievements
-            isAchievementButtonClicked = !isAchievementButtonClicked;
+            if (!isAchievementButtonClicked) isAchievementButtonClicked = true;
+            else isAchievementButtonClicked = false;
 
 
             if (!achievementsInitialized) {
@@ -255,4 +258,6 @@ public class GameMenu {
             return touchX >= left && touchX <= right &&
                     touchY >= top && touchY <= bottom;
         }
+    }
+
     }
