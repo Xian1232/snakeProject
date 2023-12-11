@@ -8,7 +8,7 @@ import android.graphics.Paint;
 import android.graphics.Point;
 import java.util.Random;
 
-class Apple {
+class Clock {
 
     // The location of the apple on the grid
     // Not in pixels
@@ -20,28 +20,28 @@ class Apple {
     private int mSize;
 
     // An image to represent the apple
-    private Bitmap mBitmapApple;
+    private Bitmap mBitmapClock;
 
     /// Set up the apple in the constructor
-    Apple(Context context, Point sr, int s){
+    Clock(Context context, Point sr, int s){
 
         // Make a note of the passed in spawn range
         mSpawnRange = sr;
         // Make a note of the size of an apple
         mSize = s;
-        // Hide the apple off-screen until the game starts
+        // Hide the clock off-screen until the game starts
         location.x = -10;
 
         // Load the image to the bitmap
-        mBitmapApple = BitmapFactory.decodeResource(context.getResources(), R.drawable.apple);
+        mBitmapClock = BitmapFactory.decodeResource(context.getResources(), R.drawable.clock);
 
         // Resize the bitmap
-        mBitmapApple = Bitmap.createScaledBitmap(mBitmapApple, s, s, false);
+        mBitmapClock = Bitmap.createScaledBitmap(mBitmapClock, s, s, false);
     }
 
-    // This is called every time an apple is eaten
+    // This is called every time the clock is eaten
     void spawn(){
-        // Choose two random values and place the apple
+        // Choose two random values and place the clock
         Random random = new Random();
         location.x = random.nextInt(mSpawnRange.x) + 1;
         location.y = random.nextInt(mSpawnRange.y - 1) + 1;
@@ -55,7 +55,7 @@ class Apple {
 
     // Draw the apple
     void draw(Canvas canvas, Paint paint){
-        canvas.drawBitmap(mBitmapApple,
+        canvas.drawBitmap(mBitmapClock,
                 location.x * mSize, location.y * mSize, paint);
 
     }

@@ -1,4 +1,4 @@
-package com.gamecodeschool.c17snake;
+package com.gamecodeschool.snakegame;
 
 import android.app.Activity;
 import android.graphics.Point;
