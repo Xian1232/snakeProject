@@ -2,4 +2,7 @@
 <resources>
     <string name="achievement_high_score">High Scorer</string>
     <string name="achievement_5_score_desc">Reach a score of 5</string>
+    <string name="achievement_high_scorer">High Scorer</string>
+    <string name="achievement_10_score_desc">Reach a score of 10</string>
 </resources>
+
