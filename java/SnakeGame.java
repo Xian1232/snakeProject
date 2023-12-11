@@ -225,10 +225,6 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
             mSoundManager.playEatSound();
         }
 
-        if(mSnake.checkObstacle(mObstacle.getLocation())){
-
-        }
-
         // Did the snake die?
         if (mSnake.detectDeath(mObstacle.getLocation())) {
             mSoundManager.playCrashSound();
