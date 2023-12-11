@@ -31,8 +31,6 @@ class Snake {
         UP, RIGHT, DOWN, LEFT
     }
 
-    private Obstacle mObstacle;
-
     // Start by heading to the right
     private Heading heading = Heading.RIGHT;
 
@@ -131,7 +129,6 @@ class Snake {
         segmentLocations.add(new Point(width / 2, height / 2));
     }
 
-
     void move() {
         // Move the body
         // Start at the back and move it
@@ -206,9 +203,9 @@ class Snake {
 
     }
 
-
     boolean detectDeath(Point oB) {
         // Has the snake died?
+        // Changed parameters to allow for obstacle boundary checking easily
         return hitScreenEdge() || hitItself() || checkObstacle(oB);
     }
     private boolean hitScreenEdge() {
@@ -268,7 +265,7 @@ class Snake {
     }
 
     boolean checkObstacle(Point oB) {
-
+        // Checks if the snake touches an Obstacle
         if (segmentLocations.get(0).x == oB.x &&
                 segmentLocations.get(0).y == oB.y) {
             return true;
