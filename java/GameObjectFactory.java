@@ -1,4 +1,4 @@
-package com.gamecodeschool.snakegame;
+package com.gamecodeschool.snakegame.java;
 
 import android.content.Context;
 import android.graphics.Point;
@@ -17,16 +17,16 @@ public class GameObjectFactory {
     public Apple createApple() {
         return new Apple(context, gridSize, blockSize);
     }
-
     public Snake createSnake() {
         return new Snake(context, gridSize, blockSize);
     }
-
     public Orange createOrange() {
         return new Orange(context, gridSize, blockSize);
     }
-
     public Bomb createBomb() {
         return new Bomb(context, gridSize, blockSize);
+    }
+    public Clock createClock() {
+        return new Clock(context, gridSize, blockSize);
     }
 }
