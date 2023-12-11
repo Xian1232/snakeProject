@@ -214,8 +214,8 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
 
             // Pause timer
             int i = 0;
-            while (i != 5) {
-               gameTimer.pause();
+            while (i != 100) {
+               gameTimer.pause(); //Havent been ab;e to test this yet
                i++;
             }
 
