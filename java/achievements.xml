@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="achievement_high_score">High Scorer</string>
+    <string name="achievement_5_score_desc">Reach a score of 5</string>
+</resources>
