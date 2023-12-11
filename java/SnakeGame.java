@@ -1,4 +1,8 @@
+
+
+
 package com.gamecodeschool.snake;
+
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -19,9 +23,20 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
     private volatile boolean mPlaying = false;
     private volatile boolean mPaused = true;
 
+    // for playing sound effects
+    private SoundPool mSP;
+    private int mEat_ID = -1;
+
+    private int mBomb_ID = -1;
+    private int mCrashID = -1;
+
+
     // The size in segments of the playable area
     private final int NUM_BLOCKS_WIDE = 40;
     private int mNumBlocksHigh;
+    void setBlocksHigh(int newBlocksHigh) {
+        mNumBlocksHigh = newBlocksHigh;
+    }
 
     // How many points does the player have
     private int mScore;
@@ -55,6 +70,12 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
     private int highestScore;
     private long highestTime;
 
+    //Add an orange
+    private Orange mOrange;
+
+    //Add le bomba
+    private Bomb mBomb;
+
 
     // This is the constructor method that gets called
     // from SnakeActivity
@@ -71,7 +92,15 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
 
         initializeDrawingObjects();
 
+
+            descriptor = assetManager.openFd("bomb.wav");
+            mBomb_ID = mSP.load(descriptor, 0);
+
+            descriptor = assetManager.openFd("snake_death.ogg");
+            mCrashID = mSP.load(descriptor, 0);
+
         GameObjectFactory factory = new GameObjectFactory(context, new Point(NUM_BLOCKS_WIDE, mNumBlocksHigh), blockSize);
+
 
 
         // Call the constructors of our two game objects
@@ -93,6 +122,29 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
         // Initialize the drawing objects
         mSurfaceHolder = getHolder();
         mPaint = new Paint();
+
+
+        // Call the constructors of our two game objects
+        mApple = new Apple(context,
+                new Point(NUM_BLOCKS_WIDE,
+                        mNumBlocksHigh),
+                blockSize);
+
+        mOrange = new Orange(context,
+                new Point(NUM_BLOCKS_WIDE,
+                        mNumBlocksHigh),
+                blockSize);
+
+        mBomb = new Bomb(context,
+                new Point(NUM_BLOCKS_WIDE,
+                        mNumBlocksHigh),
+                blockSize);
+
+        mSnake = new Snake(context,
+                new Point(NUM_BLOCKS_WIDE,
+                        mNumBlocksHigh),
+                blockSize);
+
     }
 
 
@@ -102,13 +154,20 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
         // reset the snake
         mSnake.reset(NUM_BLOCKS_WIDE, mNumBlocksHigh);
 
-        // Get the apple ready for dinner
+        // Get the fruit ready for dinner
         mApple.spawn();
         mOrange.spawn();
+
+
+        mOrange.spawn();
+
+       
+
 
         //Le bomba
         mBomb.spawn();
         mClock.spawn();
+
         // Reset the mScore
         mScore = 0;
 
@@ -220,6 +279,28 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
             mSoundManager.playClockSound();
         }
 
+        // Did the head of the snake eat the orange?
+        if(mSnake.checkDinner(mOrange.getLocation())){
+            mOrange.spawn();
+
+            // Add to  mScore
+            mScore = mScore + 2;
+
+            // Play a sound
+            mSP.play(mEat_ID, 1, 1, 0, 0, 1);
+        }
+
+        // Did the head of the snake eat the bomb?
+        if(mSnake.checkDinner(mBomb.getLocation())){
+            mBomb.spawn();
+
+            // Add to  mScore
+            mScore = mScore - 1;
+
+            // Play a sound
+            mSP.play(mBomb_ID, 1, 1, 0, 0, 1);
+        }
+
         // Did the snake die?
         if (mSnake.detectDeath()) {
             mSoundManager.playCrashSound();
@@ -262,6 +343,9 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
             // Draw the score
             mCanvas.drawText("" + mScore, 20, 120, mPaint);
 
+
+            // Draw the fruit and the snake
+
             // Draw the elapsed time
             mCanvas.drawText("Time: " + formatTime(gameTimer.getElapsedTime()), (mCanvas.getWidth() - 650) / 2, 120, mPaint);
 
@@ -271,6 +355,7 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
             mCanvas.drawText(mPaused ? "▷" : "||", mPauseButtonPosition.x + 10, mPauseButtonPosition.y  + mPauseButtonSize / 2, mPaint);
 
             // Draw the apple and the snake
+
             mApple.draw(mCanvas, mPaint);
             mOrange.draw(mCanvas, mPaint);
             mBomb.draw(mCanvas, mPaint);
@@ -278,7 +363,20 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
 
             // Draw some text while paused
             if(mPaused){
+
+                // Set the size and color of the mPaint for the text
+                mPaint.setColor(Color.argb(255, 255, 255, 255));
+                mPaint.setTextSize(250);
+
+                // Draw the message
+                // We will give this an international upgrade soon
+                //mCanvas.drawText("Tap To Play!", 200, 700, mPaint);
+                /*mCanvas.drawText(getResources().
+                                getString(R.string.tap_to_play),
+                        200, 700, mPaint); */
+
                 mMenu.draw(mCanvas, mPaused, highestScore, highestTime, mScore, gameTimer.getElapsedTime());
+
             }
             // Unlock the mCanvas and reveal the graphics for this frame
             mSurfaceHolder.unlockCanvasAndPost(mCanvas);
