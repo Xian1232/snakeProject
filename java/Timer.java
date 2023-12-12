@@ -1,4 +1,4 @@
-package com.gamecodeschool.snake;
+package com.gamecodeschool.;
 
 import android.os.Handler;
 
