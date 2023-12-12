@@ -1,6 +1,8 @@
 package com.gamecodeschool.snakegame;
 
 import android.os.Handler;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Timer {
 
@@ -28,6 +30,10 @@ public class Timer {
                 handler.postDelayed(this, 1000); // Update every 1 second
             }
         };
+    }
+
+    public void executeCommand(Command command) {
+        command.execute();
     }
 
     public void start() {
