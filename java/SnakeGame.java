@@ -48,15 +48,15 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
 
     // A snake ssss
     private Snake mSnake;
-    // And an apple
+
     private Apple mApple;
-    //Add an orange
     private Orange mOrange;
     private Clock mClock;
-
-    //Add le bomba
     private Bomb mBomb;
+    private Star mStar;
 
+    private Obstacle mObstacle;
+    
     private SoundManager mSoundManager;
 
     private Timer gameTimer;
@@ -69,12 +69,6 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
 
     private int highestScore;
     private long highestTime;
-
-    //Add an orange
-    private Orange mOrange;
-
-    //Add le bomba
-    private Bomb mBomb;
 
 
     // This is the constructor method that gets called
@@ -108,6 +102,9 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
         mOrange = factory.createOrange();
         mBomb = factory.createBomb();
         mClock = factory.createClock();
+        mStar = factory.createStar();
+        mSnake = factory.createSnake();
+        mObstacle = factory.createObstacle();
 
         mSnake = factory.createSnake();
         gameTimer = new Timer();
@@ -129,13 +126,20 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
                 new Point(NUM_BLOCKS_WIDE,
                         mNumBlocksHigh),
                 blockSize);
-
         mOrange = new Orange(context,
                 new Point(NUM_BLOCKS_WIDE,
                         mNumBlocksHigh),
                 blockSize);
 
         mBomb = new Bomb(context,
+                new Point(NUM_BLOCKS_WIDE,
+                        mNumBlocksHigh),
+                blockSize);
+        mClock = new Clock(context,
+                new Point(NUM_BLOCKS_WIDE,
+                        mNumBlocksHigh),
+                blockSize);
+        mStar = new Star(context,
                 new Point(NUM_BLOCKS_WIDE,
                         mNumBlocksHigh),
                 blockSize);
@@ -154,19 +158,18 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
         // reset the snake
         mSnake.reset(NUM_BLOCKS_WIDE, mNumBlocksHigh);
 
-        // Get the fruit ready for dinner
+        // Get the food ready for dinner
         mApple.spawn();
         mOrange.spawn();
 
-
-        mOrange.spawn();
-
-       
-
-
         //Le bomba
         mBomb.spawn();
+
+        //Add the powerups
         mClock.spawn();
+        mStar.spawn();
+
+        mObstacle.spawn();
 
         // Reset the mScore
         mScore = 0;
@@ -244,63 +247,33 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
             mSoundManager.playEatSound();
         }
 
-        if(mSnake.checkDinner(mOrange.getLocation())){
+        if(mSnake.checkOrange(mOrange.getLocation())){
+            // Similar to Apple, all the functions are the same
             mOrange.spawn();
-
-            // Add to  mScore
-            mScore = mScore + 2;
-
-            // Play a sound
+            mScore = mScore + 3;
             mSoundManager.playEatSound();
-
         }
 
         // Did the head of the snake eat the bomb?
-        if(mSnake.checkDinner(mBomb.getLocation())){
+       if(mSnake.checkBomb(mBomb.getLocation())){
+            // Similar to Apple, but you lose a point!
             mBomb.spawn();
-
-            // Add to  mScore
             mScore = mScore - 1;
-
-            // Play a sound
             mSoundManager.playBombSound();
         }
+        // Clock
         if(mSnake.checkDinner(mClock.getLocation())){
             mClock.spawn();
-
-            // Pause timer
-            int i = 0;
-            while (i != 5) {
-                gameTimer.pause();
-                i++;
-            }
-
-            // Play a sound
+            // Give double points
+               mScore = mScore * 2;
             mSoundManager.playClockSound();
         }
-
-        // Did the head of the snake eat the orange?
-        if(mSnake.checkDinner(mOrange.getLocation())){
-            mOrange.spawn();
-
-            // Add to  mScore
-            mScore = mScore + 2;
-
-            // Play a sound
-            mSP.play(mEat_ID, 1, 1, 0, 0, 1);
+        // Star
+        if(mSnake.checkStar(mStar.getLocation())){
+            mStar.spawn();
+            mScore = mScore + 10;
+            mSoundManager.playEatSound();
         }
-
-        // Did the head of the snake eat the bomb?
-        if(mSnake.checkDinner(mBomb.getLocation())){
-            mBomb.spawn();
-
-            // Add to  mScore
-            mScore = mScore - 1;
-
-            // Play a sound
-            mSP.play(mBomb_ID, 1, 1, 0, 0, 1);
-        }
-
         // Did the snake die?
         if (mSnake.detectDeath()) {
             mSoundManager.playCrashSound();
@@ -354,12 +327,14 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
             mPaint.setTextSize(90);
             mCanvas.drawText(mPaused ? "▷" : "||", mPauseButtonPosition.x + 10, mPauseButtonPosition.y  + mPauseButtonSize / 2, mPaint);
 
-            // Draw the apple and the snake
-
+           // Draw the assets
             mApple.draw(mCanvas, mPaint);
             mOrange.draw(mCanvas, mPaint);
             mBomb.draw(mCanvas, mPaint);
             mSnake.draw(mCanvas, mPaint);
+            mClock.draw(mCanvas, mPaint);
+            mStar.draw(mCanvas, mPaint);
+            mObstacle.draw(mCanvas, mPaint);
 
             // Draw some text while paused
             if(mPaused){
