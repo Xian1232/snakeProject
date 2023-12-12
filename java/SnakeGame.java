@@ -56,7 +56,6 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
     private int highestScore;
     private long highestTime;
 
-
     // This is the constructor method that gets called
     // from SnakeActivity
     public SnakeGame(Context context, Point size) {
@@ -95,24 +94,20 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
         mPaint = new Paint();
     }
 
-
     // Called to start a new game
     public void newGame() {
 
         // reset the snake
         mSnake.reset(NUM_BLOCKS_WIDE, mNumBlocksHigh);
 
-        // Get the food ready for dinner
+        // Spawn Collectibles
         mApple.spawn();
         mOrange.spawn();
-
-        //Le bomba
         mBomb.spawn();
-
-        //Add the powerups
         mClock.spawn();
         mStar.spawn();
 
+        // Spawn Obstacle(s)
         mObstacle.spawn();
 
         // Reset the mScore
@@ -122,7 +117,6 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
         mNextFrameTime = System.currentTimeMillis();
         gameTimer.reset();
     }
-
 
     // Handles the game loop
     @Override
@@ -137,16 +131,12 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
         }
     }
 
+    // Not sure what this does besides overriding...
+    // Sound still works while empty...?
+    // Bottom of my priority list tbh
     @Override
     public void play() {
-        // Check the game state and play the appropriate sound
-        if (mSnake.checkDinner(mApple.getLocation())) {
-            // Snake ate the apple
-            mSoundManager.playEatSound();
-        } else if (mSnake.detectDeath(mObstacle.getLocation())) {
-            // Snake crashed
-            mSoundManager.playCrashSound();
-        }
+
     }
 
     // Check to see if it is time for an update
@@ -213,14 +203,9 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
             mSoundManager.playClockSound();
         }
         // Star
-        if(mSnake.checkDinner(mStar.getLocation())){
+        if(mSnake.checkStar(mStar.getLocation())){
             mStar.spawn();
             mScore = mScore + 10;
-
-            int i = 0;
-            while (i != 10) {
-                mSnake.reverseMove(); //didnt get to test
-            }
             mSoundManager.playEatSound();
         }
 
@@ -242,6 +227,10 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
         }
     }
 
+    public int getScore() {
+        return mScore;
+    }
+
     // Helper method to format time in MM:SS format
     private String formatTime(long elapsedTime) {
         int seconds = (int) (elapsedTime / 1000);
@@ -257,7 +246,7 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
             mCanvas = mSurfaceHolder.lockCanvas();
 
             // Fill the screen with a color
-            mCanvas.drawColor(Color.argb(255, 26, 128, 182));
+            mCanvas.drawColor(Color.argb(255, 1, 145, 45));
 
             // Set the size and color of the mPaint for the text
             mPaint.setColor(Color.argb(255, 255, 255, 255));
@@ -272,7 +261,7 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
             // Draw the pause button
             mPaint.setColor(Color.argb(255, 255, 255, 255));
             mPaint.setTextSize(90);
-            mCanvas.drawText(mPaused ? "▷" : "||", mPauseButtonPosition.x + 10, mPauseButtonPosition.y  + mPauseButtonSize / 2, mPaint);
+            mCanvas.drawText(mPaused ? "▷" : "⏸", mPauseButtonPosition.x + 10, mPauseButtonPosition.y  + mPauseButtonSize / 2, mPaint);
 
             // Draw the assets
             mApple.draw(mCanvas, mPaint);

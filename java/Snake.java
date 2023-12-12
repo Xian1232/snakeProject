@@ -257,8 +257,21 @@ class Snake {
     boolean checkBomb(Point b) {
         if (segmentLocations.get(0).x == b.x &&
                 segmentLocations.get(0).y == b.y) {
-            // Removes a segment when eaten
             segmentLocations.remove(0);
+            return true;
+        }
+        return false;
+    }
+
+    boolean checkStar(Point s){
+        if (segmentLocations.get(0).x == s.x &&
+                segmentLocations.get(0).y == s.y) {
+            // Removes segments when eaten
+            int i = 0;
+            while (i != 5){
+                segmentLocations.remove(i);
+                i++;
+            }
             return true;
         }
         return false;
