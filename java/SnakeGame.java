@@ -51,10 +51,12 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
 
     private Timer gameTimer;
 
+
     private Point mPauseButtonPosition;
     private int mPauseButtonSize;
 
     private GameMenu mMenu;
+    private AchievementManager achievementManager;
 
     private int highestScore;
     private long highestTime;
@@ -98,6 +100,7 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
 
         highestScore = 0;
         highestTime = 0;
+        achievementManager = new AchievementManager(context);
     }
     private void initializeDrawingObjects() {
         // Initialize the drawing objects
@@ -476,5 +479,10 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
             gameTimer.resume();
         }
         mThread.start();
+    }
+
+    private void showAchievements() {
+
+        mMenu.setAchievementButtonClicked(true); // Assuming you have a setter for this flag
     }
 }

@@ -31,6 +31,8 @@ public class GameMenu {
     private float buttonHeight;
     private float margin;
 
+    private SnakeGame mSnakeGame;
+
     public GameMenu(Point screenSize) {
         this.screenSize = screenSize;
         this.paint = new Paint();
@@ -77,13 +79,14 @@ public class GameMenu {
 
             String highScoreName = context.getResources().getString(R.string.achievement_high_score);
             String highScoreDesc = context.getResources().getString(R.string.achievement_5_score_desc);
-
+            String highScorerName = context.getResources().getString(R.string.achievement_high_scorer);
+            String highScorerDesc = context.getResources().getString(R.string.achievement_10_score_desc);
             // Create an Achievement object with the retrieved strings
             Achievement highScoreAchievement = new Achievement("high_score", highScoreName, highScoreDesc);
-
+            Achievement highScorerAchievement = new Achievement("even_high_scorer", highScorerName, highScorerDesc);
             // Add the achievement to the list
             achievements.add(highScoreAchievement);
-
+            achievements.add(highScorerAchievement);
             // Add additional achievements as needed
             achievementsInitialized = true;
         }
@@ -127,6 +130,10 @@ public class GameMenu {
         isAchievementButtonClicked = clicked;
     }
 
+    private void drawButton(Canvas canvas, MenuItem button) {
+        button.draw(canvas, paint, buttonWidth, buttonHeight);
+    }
+
     private void drawInformationBox(Canvas canvas, int highestScore, long highestTime, int pScore, long pTime) {
         float boxWidth = 1000; // Adjust the width of the information box
         float boxHeight = 800; // Adjust the height of the information box
@@ -168,32 +175,30 @@ public class GameMenu {
         float x = motionEvent.getX();
         float y = motionEvent.getY();
 
+        // Check if the close button is touched when achievements are displayed
         if (newGameButton.isTouched(x, y)) {
             return true;
         }
-        else {
-            if (achievementButton.isTouched(x, y)) {
-                if (isAchievementButtonClicked && closeButton.isTouched(x, y)) {
-                    isAchievementButtonClicked = false;
-                    return false;
-                }
-                return false;
-            }
-            if (!isAchievementButtonClicked && achievementButton.isTouched(x, y)) {
-                // Toggle the display of achievements
-                isAchievementButtonClicked = !isAchievementButtonClicked;
-
-                if (!achievementsInitialized) {
-                    initializeAchievements();
-                    achievementsInitialized = true;
-                }
-                return true;
-            }
-
-            // If none of the buttons were touched, return false
-            return false;
+        if (closeButton.isTouched(x, y)) {
+            isAchievementButtonClicked = false;
+            return true;
         }
 
+        // Check if the achievements button is touched
+        if (achievementButton.isTouched(x, y)) {
+            // Toggle the display of achievements
+            if (!isAchievementButtonClicked) {
+                isAchievementButtonClicked = true;
+                if (!achievementsInitialized) {
+                    initializeAchievements();
+                }
+            }
+            return true;
+        }
+        // If none of the buttons were touched, return false
+        else{
+            return false;
+        }
     }
 
     private static class MenuItem {
