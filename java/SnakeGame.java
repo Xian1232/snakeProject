@@ -85,6 +85,10 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
         highestScore = 0;
         highestTime = 0;
     }
+
+    public void executeCommand(Command command) {
+        command.execute();
+    }
     private void initializeDrawingObjects() {
         // Initialize the drawing objects
         mSurfaceHolder = getHolder();
@@ -205,8 +209,9 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
         if (mSnake.detectDeath()) {
             mSoundManager.playCrashSound();
             mPaused = true;
-            gameTimer.stop();
-            gameTimer.die();
+            executeCommand(new StopCommand(gameTimer));
+            executeCommand(new DieCommand(gameTimer));
+
 
             long elapsedTime = gameTimer.getElapsedTime();
             if (elapsedTime > highestTime) {
@@ -242,6 +247,7 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
 
             // Draw the score
             mCanvas.drawText("" + mScore, 20, 120, mPaint);
+
 
             // Draw the elapsed time
             mCanvas.drawText("Time: " + formatTime(gameTimer.getElapsedTime()), (mCanvas.getWidth() - 650) / 2, 120, mPaint);
@@ -305,9 +311,9 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
     private void togglePause() {
         mPaused = !mPaused;
         if (mPaused) {
-            gameTimer.pause();
+            executeCommand(new PauseCommand(gameTimer));
         } else {
-            gameTimer.resume();
+            executeCommand(new ResumeCommand(gameTimer));
         }
     }
 
@@ -319,7 +325,7 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
         } catch (InterruptedException e) {
             // Error
         }
-        gameTimer.pause();
+        executeCommand(new PauseCommand(gameTimer));
     }
 
 
@@ -330,7 +336,7 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
         // could remove?
         if (!mPaused) {
             mNextFrameTime = System.currentTimeMillis();
-            gameTimer.resume();
+            executeCommand(new ResumeCommand(gameTimer));
         }
         mThread.start();
     }
