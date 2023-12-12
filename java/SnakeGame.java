@@ -455,7 +455,7 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
     }
     private void showAchievements() {
 
-        mMenu.setAchievementButtonClicked(true); // Assuming you have a setter for this flag
+        mMenu.setAchievementButtonClicked(true); 
     }
 
     public int getScore() {
