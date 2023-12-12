@@ -8,8 +8,8 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.view.MotionEvent;
-
 import java.util.ArrayList;
+import java.util.Random;
 
 class Snake {
 
@@ -25,6 +25,8 @@ class Snake {
     // Where is the centre of the screen
     // horizontally in pixels?
     private int halfWayPoint;
+
+    private int mRandom;
 
     // For tracking movement Heading
     private enum Heading {
@@ -59,25 +61,73 @@ class Snake {
         initializeBitmaps(context);
         
     }
+    public int Random(){
+        Random random = new Random();
+        int random_int = random.nextInt(20);
+        mRandom = random_int % 3;
+        return mRandom;
+    }
 
-    private void initializeBitmaps(Context context) {
-        // Create and scale the bitmaps
-        mBitmapHeadRight = BitmapFactory
-                .decodeResource(context.getResources(),
-                        R.drawable.head);
+    public void initializeBitmaps(Context context) {
+        Random();
+        switch(mRandom){
+            case 0:
+                // Create and scale the bitmaps
+                mBitmapHeadRight = BitmapFactory
+                        .decodeResource(context.getResources(),
+                                R.drawable.head1);
 
-        // Create 3 more versions of the head for different headings
-        mBitmapHeadLeft = BitmapFactory
-                .decodeResource(context.getResources(),
-                        R.drawable.head);
+                // Create 3 more versions of the head for different headings
+                mBitmapHeadLeft = BitmapFactory
+                        .decodeResource(context.getResources(),
+                                R.drawable.head1);
 
-        mBitmapHeadUp = BitmapFactory
-                .decodeResource(context.getResources(),
-                        R.drawable.head);
+                mBitmapHeadUp = BitmapFactory
+                        .decodeResource(context.getResources(),
+                                R.drawable.head1);
 
-        mBitmapHeadDown = BitmapFactory
-                .decodeResource(context.getResources(),
-                        R.drawable.head);
+                mBitmapHeadDown = BitmapFactory
+                        .decodeResource(context.getResources(),
+                                R.drawable.head1);
+                break;
+            case 1:
+                // Create and scale the bitmaps
+                mBitmapHeadRight = BitmapFactory
+                        .decodeResource(context.getResources(),
+                                R.drawable.head2);
+
+                // Create 3 more versions of the head for different headings
+                mBitmapHeadLeft = BitmapFactory
+                        .decodeResource(context.getResources(),
+                                R.drawable.head2);
+
+                mBitmapHeadUp = BitmapFactory
+                        .decodeResource(context.getResources(),
+                                R.drawable.head2);
+
+                mBitmapHeadDown = BitmapFactory
+                        .decodeResource(context.getResources(),
+                                R.drawable.head2);
+            break;
+            case 2:
+                mBitmapHeadRight = BitmapFactory
+                    .decodeResource(context.getResources(),
+                            R.drawable.head3);
+
+                // Create 3 more versions of the head for different headings
+                mBitmapHeadLeft = BitmapFactory
+                        .decodeResource(context.getResources(),
+                                R.drawable.head3);
+
+                mBitmapHeadUp = BitmapFactory
+                        .decodeResource(context.getResources(),
+                                R.drawable.head3);
+
+                mBitmapHeadDown = BitmapFactory
+                        .decodeResource(context.getResources(),
+                                R.drawable.head3);
+            break;
+        }
 
         // Modify the bitmaps to face the snake head
         // in the correct direction
@@ -107,10 +157,23 @@ class Snake {
                         0, 0, mSegmentSize, mSegmentSize, matrix, true);
 
         // Create and scale the body
-        mBitmapBody = BitmapFactory
-                .decodeResource(context.getResources(),
-                        R.drawable.body);
-
+        switch(mRandom){
+            case 0:
+                mBitmapBody = BitmapFactory
+                        .decodeResource(context.getResources(),
+                                R.drawable.body1);
+                break;
+            case 1:
+                mBitmapBody = BitmapFactory
+                        .decodeResource(context.getResources(),
+                                R.drawable.body2);
+                break;
+            case 2:
+                mBitmapBody = BitmapFactory
+                        .decodeResource(context.getResources(),
+                                R.drawable.body3);
+                break;
+        }
         mBitmapBody = Bitmap
                 .createScaledBitmap(mBitmapBody,
                         mSegmentSize, mSegmentSize, false);
@@ -227,8 +290,7 @@ class Snake {
         return false;
     }
 
-    boolean checkDinner(Point l) {
-        //if (snakeXs[0] == l.x && snakeYs[0] == l.y) {
+    boolean checkApple(Point l) {
         if (segmentLocations.get(0).x == l.x &&
                 segmentLocations.get(0).y == l.y) {
 
@@ -263,15 +325,31 @@ class Snake {
         return false;
     }
 
+    boolean checkClock(Point c) {
+        if (segmentLocations.get(0).x == c.x &&
+                segmentLocations.get(0).y == c.y) {
+            segmentLocations.add(new Point(-10, -10));
+            return true;
+        }
+        return false;
+    }
+
     boolean checkStar(Point s){
         if (segmentLocations.get(0).x == s.x &&
                 segmentLocations.get(0).y == s.y) {
             // Removes segments when eaten
-            int i = 0;
-            while (i != 5){
-                segmentLocations.remove(i);
-                i++;
-            }
+            segmentLocations.add(new Point(-10, -10));
+            segmentLocations.add(new Point(-10, -10));
+            segmentLocations.add(new Point(-10, -10));
+            segmentLocations.add(new Point(-10, -10));
+            segmentLocations.add(new Point(-10, -10));
+            segmentLocations.add(new Point(-10, -10));
+            segmentLocations.add(new Point(-10, -10));
+            segmentLocations.add(new Point(-10, -10));
+            segmentLocations.add(new Point(-10, -10));
+            segmentLocations.add(new Point(-10, -10));
+            segmentLocations.add(new Point(-10, -10));
+
             return true;
         }
         return false;

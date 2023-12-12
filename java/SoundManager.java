@@ -7,7 +7,6 @@ import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.Build;
-
 import java.io.IOException;
 
 // Define the Audio interface
@@ -138,16 +137,16 @@ public class SoundManager {
         AssetFileDescriptor descriptor;
 
         // Prepare the sounds in memory
-        descriptor = assetManager.openFd("get_apple.ogg");
+        descriptor = assetManager.openFd("get_collectible.wav");
         eatSoundId = soundPool.load(descriptor, 0);
 
         descriptor = assetManager.openFd("bomb.wav");
         bombId = soundPool.load(descriptor, 0);
 
-        descriptor = assetManager.openFd("snake_death.ogg");
+        descriptor = assetManager.openFd("snake_death.wav");
         crashSoundId = soundPool.load(descriptor, 0);
 
-        descriptor = assetManager.openFd("ClockSound.ogg");
+        descriptor = assetManager.openFd("clock.wav");
         clockId = soundPool.load(descriptor, 0);
 
         descriptor = assetManager.openFd("StarSound.ogg");
@@ -165,12 +164,12 @@ public class SoundManager {
     }
 
     void playBombSound() {
-        audioContext.setAudio(new BombSound(soundPool, crashSoundId));
+        audioContext.setAudio(new BombSound(soundPool, bombId));
         audioContext.playAudio();
     }
 
     void playClockSound() {
-        audioContext.setAudio(new ClockSound(soundPool, crashSoundId));
+        audioContext.setAudio(new ClockSound(soundPool, clockId));
         audioContext.playAudio();
     }
 

@@ -6,7 +6,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Point;
-
 import java.util.Random;
 
 class Clock {
@@ -46,6 +45,11 @@ class Clock {
         Random random = new Random();
         location.x = random.nextInt(mSpawnRange.x) + 1;
         location.y = random.nextInt(mSpawnRange.y - 1) + 1;
+    }
+
+    void remove(){
+        location.x = -1000;
+        location.y = -1000;
     }
 
     // Let SnakeGame know where the apple is

@@ -47,6 +47,10 @@ class Orange {
         location.x = random.nextInt(mSpawnRange.x) + 1;
         location.y = random.nextInt(mSpawnRange.y - 1) + 1;
     }
+    void remove(){
+        location.x = -1000;
+        location.y = -1000;
+    }
 
     // Let SnakeGame know where the orange is
     // SnakeGame can share this with the snake

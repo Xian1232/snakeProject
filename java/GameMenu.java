@@ -7,7 +7,6 @@ import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.RectF;
 import android.view.MotionEvent;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,8 +43,8 @@ public class GameMenu {
 
         this.newGameButton = new MenuItem("New Game", centerX - 400, centerY - 250, true);
         this.achievementButton = new MenuItem("Achievements", centerX - 400, centerY - 50, true);
-        this.statsButton = new MenuItem("Stats", centerX - 400, centerY + 150, true);
-        this.skinsButton = new MenuItem("Skins", centerX - 400, centerY + 350, true);
+        //this.statsButton = new MenuItem("Stats", centerX - 400, centerY + 150, true);
+        //this.skinsButton = new MenuItem("Skins", centerX - 400, centerY + 350, true);
         this.playButton = new MenuItem("▷", screenSize.x - 50 - margin, 70, true);
         this.pauseButton = new MenuItem("⏸", screenSize.x - 50 - margin, 70, true);
         float closeButtonSize = 100; // Size of the close button
@@ -57,8 +56,8 @@ public class GameMenu {
         canvas.drawRect(0, 0, screenSize.x, screenSize.y, paint);
         drawButton(canvas, newGameButton, 600, 130);
         drawButton(canvas, achievementButton, 600, 130);
-        drawButton(canvas, statsButton, 600, 130);
-        drawButton(canvas, skinsButton, 600, 130);
+        //drawButton(canvas, statsButton, 600, 130);
+        //drawButton(canvas, skinsButton, 600, 130);
 
         if (isPaused) {
             drawButton(canvas, playButton, 75, 75);

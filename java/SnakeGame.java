@@ -8,6 +8,7 @@ import android.graphics.Point;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import java.util.Random;
 
 class SnakeGame extends SurfaceView implements Runnable, Audio {
 
@@ -46,6 +47,8 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
 
     private SoundManager mSoundManager;
 
+    private int mRandom;
+
     private Timer gameTimer;
 
     private Point mPauseButtonPosition;
@@ -55,6 +58,13 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
 
     private int highestScore;
     private long highestTime;
+
+    public int Random(){
+        Random random = new Random();
+        int random_int = random.nextInt(700);
+        mRandom = random_int % 11;
+        return mRandom;
+    }
 
     // This is the constructor method that gets called
     // from SnakeActivity
@@ -74,6 +84,7 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
         GameObjectFactory factory = new GameObjectFactory(context, new Point(NUM_BLOCKS_WIDE, mNumBlocksHigh), blockSize);
 
         // Call the constructors of our game objects
+        Random();
         mApple = factory.createApple();
         mOrange = factory.createOrange();
         mBomb = factory.createBomb();
@@ -99,13 +110,41 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
 
         // reset the snake
         mSnake.reset(NUM_BLOCKS_WIDE, mNumBlocksHigh);
+        // Remove all past collectibles (left over from the last game
+        mApple.remove();
+        mOrange.remove();
+        mClock.remove();
+        mStar.remove();
 
-        // Spawn Collectibles
-        mApple.spawn();
-        mOrange.spawn();
+        // Spawn new Collectibles
+        Random();
+        switch(mRandom){
+            case 0: mStar.spawn();
+                break;
+            case 1: mApple.spawn();
+                break;
+            case 2: mApple.spawn();
+                break;
+            case 3: mApple.spawn();
+                break;
+            case 4: mApple.spawn();
+                break;
+            case 5: mApple.spawn();
+                break;
+            case 6: mApple.spawn();
+                break;
+            case 7: mOrange.spawn();
+                break;
+            case 8: mOrange.spawn();
+                break;
+            case 9: mOrange.spawn();
+                break;
+            case 10: mClock.spawn();
+                break;
+        }
+
+        // Spawn Bomb
         mBomb.spawn();
-        mClock.spawn();
-        mStar.spawn();
 
         // Spawn Obstacle(s)
         mObstacle.spawn();
@@ -162,7 +201,6 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
         return false;
     }
 
-
     // Update all the game objects
     public void update() {
         // Move the snake
@@ -170,8 +208,33 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
 
         // Did the head of the snake eat any of the collectibles?
         // Apple
-        if(mSnake.checkDinner(mApple.getLocation())){
-            mApple.spawn();
+        if(mSnake.checkApple(mApple.getLocation())){
+            mApple.remove();
+            Random();
+            switch(mRandom){
+                case 0: mStar.spawn();
+                    break;
+                case 1: mApple.spawn();
+                    break;
+                case 2: mApple.spawn();
+                    break;
+                case 3: mApple.spawn();
+                    break;
+                case 4: mApple.spawn();
+                    break;
+                case 5: mApple.spawn();
+                    break;
+                case 6: mApple.spawn();
+                    break;
+                case 7: mOrange.spawn();
+                    break;
+                case 8: mOrange.spawn();
+                    break;
+                case 9: mOrange.spawn();
+                    break;
+                case 10: mClock.spawn();
+                    break;
+            }
             // Add to  mScore
             mScore = mScore + 1;
             // Play a sound
@@ -180,7 +243,32 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
         // Orange
         if(mSnake.checkOrange(mOrange.getLocation())){
             // Similar to Apple, all the functions are the same
-            mOrange.spawn();
+            mOrange.remove();
+            Random();
+            switch(mRandom){
+                case 0: mStar.spawn();
+                    break;
+                case 1: mApple.spawn();
+                    break;
+                case 2: mApple.spawn();
+                    break;
+                case 3: mApple.spawn();
+                    break;
+                case 4: mApple.spawn();
+                    break;
+                case 5: mApple.spawn();
+                    break;
+                case 6: mApple.spawn();
+                    break;
+                case 7: mOrange.spawn();
+                    break;
+                case 8: mOrange.spawn();
+                    break;
+                case 9: mOrange.spawn();
+                    break;
+                case 10: mClock.spawn();
+                    break;
+            }
             mScore = mScore + 3;
             mSoundManager.playEatSound();
         }
@@ -192,34 +280,74 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
             mSoundManager.playBombSound();
         }
         // Clock
-        if(mSnake.checkDinner(mClock.getLocation())){
-            mClock.spawn();
-            // Pause timer
-            int i = 0;
-            while (i != 100) {
-               gameTimer.pause();
-               i++;
+        if(mSnake.checkClock(mClock.getLocation())){
+            mClock.remove();
+            Random();
+            switch(mRandom){
+                case 0: mApple.spawn();
+                    break;
+                case 1: mApple.spawn();
+                    break;
+                case 2: mApple.spawn();
+                    break;
+                case 3: mApple.spawn();
+                    break;
+                case 4: mApple.spawn();
+                    break;
+                case 5: mApple.spawn();
+                    break;
+                case 6: mApple.spawn();
+                    break;
+                case 7: mOrange.spawn();
+                    break;
+                case 8: mOrange.spawn();
+                    break;
+                case 9: mOrange.spawn();
+                    break;
+                case 10: mOrange.spawn();;
+                    break;
             }
+            // Was supposed to stop timer, but broke, now doubles score
+            mScore = mScore * 2;
             mSoundManager.playClockSound();
         }
         // Star
         if(mSnake.checkStar(mStar.getLocation())){
-            mStar.spawn();
+            mStar.remove();
+            Random();
+            switch(mRandom){
+                case 0: mApple.spawn();
+                    break;
+                case 1: mApple.spawn();
+                    break;
+                case 2: mApple.spawn();
+                    break;
+                case 3: mApple.spawn();
+                    break;
+                case 4: mApple.spawn();
+                    break;
+                case 5: mApple.spawn();
+                    break;
+                case 6: mApple.spawn();
+                    break;
+                case 7: mOrange.spawn();
+                    break;
+                case 8: mOrange.spawn();
+                    break;
+                case 9: mOrange.spawn();
+                    break;
+                case 10: mOrange.spawn();
+                    break;
+            }
             mScore = mScore + 10;
             mSoundManager.playEatSound();
         }
 
         // Did the snake die?
         if (mSnake.detectDeath(mObstacle.getLocation())) {
+            gameTimer.pause();
             mSoundManager.playCrashSound();
             mPaused = true;
-            gameTimer.stop();
-            gameTimer.die();
-
-            long elapsedTime = gameTimer.getElapsedTime();
-            if (elapsedTime > highestTime) {
-                highestTime = elapsedTime;
-            }
 
             if ((mScore > highestScore) && (mScore > 0)) {
                 highestScore = mScore;
