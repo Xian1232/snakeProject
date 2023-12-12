@@ -1,8 +1,4 @@
-
-
-
-package com.gamecodeschool.snake;
-
+package com.gamecodeschool.snakegame;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -23,20 +19,9 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
     private volatile boolean mPlaying = false;
     private volatile boolean mPaused = true;
 
-    // for playing sound effects
-    private SoundPool mSP;
-    private int mEat_ID = -1;
-
-    private int mBomb_ID = -1;
-    private int mCrashID = -1;
-
-
     // The size in segments of the playable area
     private final int NUM_BLOCKS_WIDE = 40;
     private int mNumBlocksHigh;
-    void setBlocksHigh(int newBlocksHigh) {
-        mNumBlocksHigh = newBlocksHigh;
-    }
 
     // How many points does the player have
     private int mScore;
@@ -48,14 +33,16 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
 
     // A snake ssss
     private Snake mSnake;
-    // And an apple
-    private Apple mApple;
-    //Add an orange
-    private Orange mOrange;
-    private Clock mClock;
 
-    //Add le bomba
+    // Collectibles
+    private Apple mApple;
+    private Orange mOrange;
     private Bomb mBomb;
+    private Clock mClock;
+    private Star mStar;
+
+    // Obstacles
+    private Obstacle mObstacle;
 
     private SoundManager mSoundManager;
 
@@ -65,21 +52,13 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
     private int mPauseButtonSize;
 
     private GameMenu mMenu;
-    private AchievementManager achievementManager;
 
     private int highestScore;
     private long highestTime;
 
-    //Add an orange
-    private Orange mOrange;
-
-    //Add le bomba
-    private Bomb mBomb;
-
-
     // This is the constructor method that gets called
     // from SnakeActivity
-    public SnakeGame(Point size, Context context, SnakeActivity snakeGame) {
+    public SnakeGame(Context context, Point size) {
         super(context);
 
         // Work out how many pixels each block is
@@ -88,65 +67,32 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
         mNumBlocksHigh = size.y / blockSize;
 
         mSoundManager = new SoundManager(context);
-        mMenu = new GameMenu(size, this.getContext(),this);
+        mMenu = new GameMenu(size);
 
         initializeDrawingObjects();
 
-
-            descriptor = assetManager.openFd("bomb.wav");
-            mBomb_ID = mSP.load(descriptor, 0);
-
-            descriptor = assetManager.openFd("snake_death.ogg");
-            mCrashID = mSP.load(descriptor, 0);
-
         GameObjectFactory factory = new GameObjectFactory(context, new Point(NUM_BLOCKS_WIDE, mNumBlocksHigh), blockSize);
 
-
-
-        // Call the constructors of our two game objects
+        // Call the constructors of our game objects
         mApple = factory.createApple();
         mOrange = factory.createOrange();
         mBomb = factory.createBomb();
         mClock = factory.createClock();
-
+        mStar = factory.createStar();
         mSnake = factory.createSnake();
+        mObstacle = factory.createObstacle();
         gameTimer = new Timer();
         mPauseButtonPosition = new Point(size.x - 200, 20);
         mPauseButtonSize = 150;
 
         highestScore = 0;
         highestTime = 0;
-        achievementManager = new AchievementManager(context);
     }
     private void initializeDrawingObjects() {
         // Initialize the drawing objects
         mSurfaceHolder = getHolder();
         mPaint = new Paint();
-
-
-        // Call the constructors of our two game objects
-        mApple = new Apple(context,
-                new Point(NUM_BLOCKS_WIDE,
-                        mNumBlocksHigh),
-                blockSize);
-
-        mOrange = new Orange(context,
-                new Point(NUM_BLOCKS_WIDE,
-                        mNumBlocksHigh),
-                blockSize);
-
-        mBomb = new Bomb(context,
-                new Point(NUM_BLOCKS_WIDE,
-                        mNumBlocksHigh),
-                blockSize);
-
-        mSnake = new Snake(context,
-                new Point(NUM_BLOCKS_WIDE,
-                        mNumBlocksHigh),
-                blockSize);
-
     }
-
 
     // Called to start a new game
     public void newGame() {
@@ -154,19 +100,15 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
         // reset the snake
         mSnake.reset(NUM_BLOCKS_WIDE, mNumBlocksHigh);
 
-        // Get the fruit ready for dinner
+        // Spawn Collectibles
         mApple.spawn();
         mOrange.spawn();
-
-
-        mOrange.spawn();
-
-       
-
-
-        //Le bomba
         mBomb.spawn();
         mClock.spawn();
+        mStar.spawn();
+
+        // Spawn Obstacle(s)
+        mObstacle.spawn();
 
         // Reset the mScore
         mScore = 0;
@@ -175,7 +117,6 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
         mNextFrameTime = System.currentTimeMillis();
         gameTimer.reset();
     }
-
 
     // Handles the game loop
     @Override
@@ -190,16 +131,12 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
         }
     }
 
+    // Not sure what this does besides overriding...
+    // Sound still works while empty...?
+    // Bottom of my priority list tbh
     @Override
     public void play() {
-        // Check the game state and play the appropriate sound
-        if (mSnake.checkDinner(mApple.getLocation())) {
-            // Snake ate the apple
-            mSoundManager.playEatSound();
-        } else if (mSnake.detectDeath()) {
-            // Snake crashed
-            mSoundManager.playCrashSound();
-        }
+
     }
 
     // Check to see if it is time for an update
@@ -228,81 +165,52 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
 
     // Update all the game objects
     public void update() {
-
         // Move the snake
         mSnake.move();
-        // Check for achievements related to score, time, or special events
-        achievementManager.checkAchievements(this);
-        // Did the head of the snake eat the apple?
-        if(mSnake.checkDinner(mApple.getLocation())){
-            // This reminds me of Edge of Tomorrow.
-            // One day the apple will be ready!
-            mApple.spawn();
 
+        // Did the head of the snake eat any of the collectibles?
+        // Apple
+        if(mSnake.checkDinner(mApple.getLocation())){
+            mApple.spawn();
             // Add to  mScore
             mScore = mScore + 1;
+            // Play a sound
             mSoundManager.playEatSound();
         }
-
-        if(mSnake.checkDinner(mOrange.getLocation())){
+        // Orange
+        if(mSnake.checkOrange(mOrange.getLocation())){
+            // Similar to Apple, all the functions are the same
             mOrange.spawn();
-
-            // Add to  mScore
-            mScore = mScore + 2;
-
-            // Play a sound
+            mScore = mScore + 3;
             mSoundManager.playEatSound();
-
         }
-
-        // Did the head of the snake eat the bomb?
-        if(mSnake.checkDinner(mBomb.getLocation())){
+        // Bomb
+        if(mSnake.checkBomb(mBomb.getLocation())){
+            // Similar to Apple, but you lose a point!
             mBomb.spawn();
-
-            // Add to  mScore
             mScore = mScore - 1;
-
-            // Play a sound
             mSoundManager.playBombSound();
         }
+        // Clock
         if(mSnake.checkDinner(mClock.getLocation())){
             mClock.spawn();
-
             // Pause timer
             int i = 0;
-            while (i != 5) {
-                gameTimer.pause();
-                i++;
+            while (i != 100) {
+               gameTimer.pause();
+               i++;
             }
-
-            // Play a sound
             mSoundManager.playClockSound();
         }
-
-        // Did the head of the snake eat the orange?
-        if(mSnake.checkDinner(mOrange.getLocation())){
-            mOrange.spawn();
-
-            // Add to  mScore
-            mScore = mScore + 2;
-
-            // Play a sound
-            mSP.play(mEat_ID, 1, 1, 0, 0, 1);
-        }
-
-        // Did the head of the snake eat the bomb?
-        if(mSnake.checkDinner(mBomb.getLocation())){
-            mBomb.spawn();
-
-            // Add to  mScore
-            mScore = mScore - 1;
-
-            // Play a sound
-            mSP.play(mBomb_ID, 1, 1, 0, 0, 1);
+        // Star
+        if(mSnake.checkStar(mStar.getLocation())){
+            mStar.spawn();
+            mScore = mScore + 10;
+            mSoundManager.playEatSound();
         }
 
         // Did the snake die?
-        if (mSnake.detectDeath()) {
+        if (mSnake.detectDeath(mObstacle.getLocation())) {
             mSoundManager.playCrashSound();
             mPaused = true;
             gameTimer.stop();
@@ -317,6 +225,10 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
                 highestScore = mScore;
             }
         }
+    }
+
+    public int getScore() {
+        return mScore;
     }
 
     // Helper method to format time in MM:SS format
@@ -334,7 +246,7 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
             mCanvas = mSurfaceHolder.lockCanvas();
 
             // Fill the screen with a color
-            mCanvas.drawColor(Color.argb(255, 26, 128, 182));
+            mCanvas.drawColor(Color.argb(255, 1, 145, 45));
 
             // Set the size and color of the mPaint for the text
             mPaint.setColor(Color.argb(255, 255, 255, 255));
@@ -343,40 +255,26 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
             // Draw the score
             mCanvas.drawText("" + mScore, 20, 120, mPaint);
 
-
-            // Draw the fruit and the snake
-
             // Draw the elapsed time
             mCanvas.drawText("Time: " + formatTime(gameTimer.getElapsedTime()), (mCanvas.getWidth() - 650) / 2, 120, mPaint);
 
             // Draw the pause button
             mPaint.setColor(Color.argb(255, 255, 255, 255));
             mPaint.setTextSize(90);
-            mCanvas.drawText(mPaused ? "▷" : "||", mPauseButtonPosition.x + 10, mPauseButtonPosition.y  + mPauseButtonSize / 2, mPaint);
+            mCanvas.drawText(mPaused ? "▷" : "⏸", mPauseButtonPosition.x + 10, mPauseButtonPosition.y  + mPauseButtonSize / 2, mPaint);
 
-            // Draw the apple and the snake
-
+            // Draw the assets
             mApple.draw(mCanvas, mPaint);
             mOrange.draw(mCanvas, mPaint);
             mBomb.draw(mCanvas, mPaint);
             mSnake.draw(mCanvas, mPaint);
+            mClock.draw(mCanvas, mPaint);
+            mStar.draw(mCanvas, mPaint);
+            mObstacle.draw(mCanvas, mPaint);
 
             // Draw some text while paused
             if(mPaused){
-
-                // Set the size and color of the mPaint for the text
-                mPaint.setColor(Color.argb(255, 255, 255, 255));
-                mPaint.setTextSize(250);
-
-                // Draw the message
-                // We will give this an international upgrade soon
-                //mCanvas.drawText("Tap To Play!", 200, 700, mPaint);
-                /*mCanvas.drawText(getResources().
-                                getString(R.string.tap_to_play),
-                        200, 700, mPaint); */
-
                 mMenu.draw(mCanvas, mPaused, highestScore, highestTime, mScore, gameTimer.getElapsedTime());
-
             }
             // Unlock the mCanvas and reveal the graphics for this frame
             mSurfaceHolder.unlockCanvasAndPost(mCanvas);
@@ -398,8 +296,6 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
                     gameTimer.start();
                     return true;
                 }
-
-
 
                 // Let the Snake class handle the input
                 mSnake.switchHeading(motionEvent);
@@ -453,11 +349,4 @@ class SnakeGame extends SurfaceView implements Runnable, Audio {
         }
         mThread.start();
     }
-    private void showAchievements() {
-
-        mMenu.setAchievementButtonClicked(true); 
-    }
-
-    public int getScore() {
-        return mScore;
-    }
+}
