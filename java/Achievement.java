@@ -1,4 +1,4 @@
-package com.gamecodeschool.snake;
+package com.gamecodeschool.snakegame;
 
 public class Achievement {
     private String id;
@@ -33,3 +33,4 @@ public class Achievement {
     public void setUnlocked(boolean unlocked) {
         this.unlocked = unlocked;
     }
+}

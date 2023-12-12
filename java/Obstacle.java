@@ -1,4 +1,4 @@
-package com.example.snakeactivity;
+package com.gamecodeschool.snakegame;
 
 import android.content.Context;
 import android.graphics.Bitmap;

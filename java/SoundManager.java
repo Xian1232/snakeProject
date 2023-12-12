@@ -1,4 +1,4 @@
-package com.gamecodeschool.snake;
+package com.gamecodeschool.snakegame;
 
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
@@ -7,6 +7,7 @@ import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.Build;
+
 import java.io.IOException;
 
 // Define the Audio interface
@@ -60,6 +61,7 @@ class BombSound implements Audio {
         soundPool.play(soundId, 1, 1, 0, 0, 1);
     }
 }
+
 class ClockSound implements Audio {
     private final SoundPool soundPool;
     private final int soundId;
@@ -95,6 +97,8 @@ public class SoundManager {
     private SoundPool soundPool;
     private int eatSoundId = -1;
     private int bombId = -1;
+    private int clockId = -1;
+    private int starId = -1;
 
     private int crashSoundId = -1;
     private AudioContext audioContext;
@@ -142,6 +146,12 @@ public class SoundManager {
 
         descriptor = assetManager.openFd("snake_death.ogg");
         crashSoundId = soundPool.load(descriptor, 0);
+
+        descriptor = assetManager.openFd("ClockSound.ogg");
+        clockId = soundPool.load(descriptor, 0);
+
+        descriptor = assetManager.openFd("StarSound.ogg");
+        starId = soundPool.load(descriptor, 0);
     }
 
     void playEatSound() {
@@ -158,8 +168,14 @@ public class SoundManager {
         audioContext.setAudio(new BombSound(soundPool, crashSoundId));
         audioContext.playAudio();
     }
-void playClockSound() {
-    audioContext.setAudio(new ClockSound(soundPool, crashSoundId));
-    audioContext.playAudio();
-}
+
+    void playClockSound() {
+        audioContext.setAudio(new ClockSound(soundPool, crashSoundId));
+        audioContext.playAudio();
+    }
+
+    void playStarSound() {
+        audioContext.setAudio(new EatSound(soundPool, crashSoundId));
+        audioContext.playAudio();
+    }
 }

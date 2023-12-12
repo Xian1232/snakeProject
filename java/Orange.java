@@ -1,4 +1,4 @@
-package com.gamecodeschool.snake133.java;
+package com.gamecodeschool.snakegame;
 
 import android.content.Context;
 import android.graphics.Bitmap;

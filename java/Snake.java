@@ -1,4 +1,4 @@
-package com.gamecodeschool.snake;
+package com.gamecodeschool.snakegame;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -24,7 +24,7 @@ class Snake {
 
     // Where is the centre of the screen
     // horizontally in pixels?
-    private static int halfWayPoint;
+    private int halfWayPoint;
 
     // For tracking movement Heading
     private enum Heading {
@@ -32,7 +32,7 @@ class Snake {
     }
 
     // Start by heading to the right
-    private static Heading heading = Heading.RIGHT;
+    private Heading heading = Heading.RIGHT;
 
     // A bitmap for each direction the head can face
     private Bitmap mBitmapHeadRight;
@@ -53,30 +53,37 @@ class Snake {
         // range from the passed in parameters
         mSegmentSize = ss;
         mMoveRange = mr;
+        // The halfway point across the screen in pixels
+        // Used to detect which side of screen was pressed
+        halfWayPoint = mr.x * ss / 2;
+        initializeBitmaps(context);
+        
+    }
 
+    private void initializeBitmaps(Context context) {
         // Create and scale the bitmaps
         mBitmapHeadRight = BitmapFactory
                 .decodeResource(context.getResources(),
-                        R.drawable.head);
+                        R.drawable.head1);
 
         // Create 3 more versions of the head for different headings
         mBitmapHeadLeft = BitmapFactory
                 .decodeResource(context.getResources(),
-                        R.drawable.head);
+                        R.drawable.head1);
 
         mBitmapHeadUp = BitmapFactory
                 .decodeResource(context.getResources(),
-                        R.drawable.head);
+                        R.drawable.head1);
 
         mBitmapHeadDown = BitmapFactory
                 .decodeResource(context.getResources(),
-                        R.drawable.head);
+                        R.drawable.head1);
 
         // Modify the bitmaps to face the snake head
         // in the correct direction
         mBitmapHeadRight = Bitmap
                 .createScaledBitmap(mBitmapHeadRight,
-                        ss, ss, false);
+                        mSegmentSize, mSegmentSize, false);
 
         // A matrix for scaling
         Matrix matrix = new Matrix();
@@ -84,37 +91,33 @@ class Snake {
 
         mBitmapHeadLeft = Bitmap
                 .createBitmap(mBitmapHeadRight,
-                        0, 0, ss, ss, matrix, true);
+                        0, 0, mSegmentSize, mSegmentSize, matrix, true);
 
         // A matrix for rotating
         matrix.preRotate(-90);
         mBitmapHeadUp = Bitmap
                 .createBitmap(mBitmapHeadRight,
-                        0, 0, ss, ss, matrix, true);
+                        0, 0, mSegmentSize, mSegmentSize, matrix, true);
 
         // Matrix operations are cumulative
         // so rotate by 180 to face down
         matrix.preRotate(180);
         mBitmapHeadDown = Bitmap
                 .createBitmap(mBitmapHeadRight,
-                        0, 0, ss, ss, matrix, true);
+                        0, 0, mSegmentSize, mSegmentSize, matrix, true);
 
         // Create and scale the body
         mBitmapBody = BitmapFactory
                 .decodeResource(context.getResources(),
-                        R.drawable.body);
+                        R.drawable.body1);
 
         mBitmapBody = Bitmap
                 .createScaledBitmap(mBitmapBody,
-                        ss, ss, false);
-
-        // The halfway point across the screen in pixels
-        // Used to detect which side of screen was pressed
-        halfWayPoint = mr.x * ss / 2;
+                        mSegmentSize, mSegmentSize, false);
     }
 
     // Get the snake ready for a new game
-    void reset(int w, int h) {
+    void reset(int width, int height) {
 
         // Reset the heading
         heading = Heading.RIGHT;
@@ -123,9 +126,8 @@ class Snake {
         segmentLocations.clear();
 
         // Start with a single snake segment
-        segmentLocations.add(new Point(w / 2, h / 2));
+        segmentLocations.add(new Point(width / 2, height / 2));
     }
-
 
     void move() {
         // Move the body
@@ -164,32 +166,68 @@ class Snake {
 
     }
 
-    boolean detectDeath() {
-        // Has the snake died?
-        boolean dead = false;
-
-        // Hit any of the screen edges
-        if (segmentLocations.get(0).x == -1 ||
-                segmentLocations.get(0).x > mMoveRange.x ||
-                segmentLocations.get(0).y == -1 ||
-                segmentLocations.get(0).y > mMoveRange.y) {
-
-            dead = true;
-        }
-
-        // Eaten itself?
+    void reverseMove() {
+        // Move the body
+        // Start at the back and move it
+        // to the position of the segment in front of it
         for (int i = segmentLocations.size() - 1; i > 0; i--) {
-            // Have any of the sections collided with the head
-            if (segmentLocations.get(0).x == segmentLocations.get(i).x &&
-                    segmentLocations.get(0).y == segmentLocations.get(i).y) {
 
-                dead = true;
-            }
+            // Make it the same value as the next segment
+            // going forwards towards the head
+            segmentLocations.get(i).x = segmentLocations.get(i - 1).x;
+            segmentLocations.get(i).y = segmentLocations.get(i - 1).y;
         }
-        return dead;
+
+        // Move the head in the appropriate heading
+        // Get the existing head position
+        Point p = segmentLocations.get(0);
+
+        // Move it appropriately
+        switch (heading) {
+            case UP:
+                p.y++;
+                break;
+
+            case RIGHT:
+                p.x--;
+                break;
+
+            case DOWN:
+                p.y--;
+                break;
+
+            case LEFT:
+                p.x++;
+                break;
+        }
+
     }
 
-   boolean checkDinner(Point l) {
+    boolean detectDeath(Point oB) {
+        // Has the snake died?
+        // Changed parameters to allow for obstacle boundary checking easily
+        return hitScreenEdge() || hitItself() || checkObstacle(oB);
+    }
+    private boolean hitScreenEdge() {
+        // Hit any of the screen edges
+        Point head = segmentLocations.get(0);
+            return head.x == -1 || head.x > mMoveRange.x || head.y == -1 || head.y > mMoveRange.y;
+    }
+
+    private boolean hitItself() {
+        // Eaten itself?
+        Point head = segmentLocations.get(0);
+        for (int i = segmentLocations.size() - 1; i > 0; i--) {
+            Point body = segmentLocations.get(i);
+            // Have any of the sections collided with the head
+            if (head.x == body.x && head.y == body.y) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    boolean checkDinner(Point l) {
         //if (snakeXs[0] == l.x && snakeYs[0] == l.y) {
         if (segmentLocations.get(0).x == l.x &&
                 segmentLocations.get(0).y == l.y) {
@@ -219,27 +257,34 @@ class Snake {
     boolean checkBomb(Point b) {
         if (segmentLocations.get(0).x == b.x &&
                 segmentLocations.get(0).y == b.y) {
-            // Removes a segment when eaten
-            segmentLocations.remove(0);
-            return true;
-        }
-        return false;
-    }
-    boolean checkStar(Point s) {
-        if (segmentLocations.get(0).x == s.x &&
-                segmentLocations.get(0).y == s.y) {
-            // Removes a segment when eaten
-            segmentLocations.remove(0);
-            segmentLocations.remove(0);
-            segmentLocations.remove(0);
-            segmentLocations.remove(0);
             segmentLocations.remove(0);
             return true;
         }
         return false;
     }
 
-     void draw(Canvas canvas, Paint paint) {
+    boolean checkStar(Point s){
+        if (segmentLocations.get(0).x == s.x &&
+                segmentLocations.get(0).y == s.y) {
+            // Removes segments when eaten
+            segmentLocations.remove(0);
+            segmentLocations.remove(1);
+            segmentLocations.remove(2);
+            return true;
+        }
+        return false;
+    }
+
+    boolean checkObstacle(Point oB) {
+        // Checks if the snake touches an Obstacle
+        if (segmentLocations.get(0).x == oB.x &&
+                segmentLocations.get(0).y == oB.y) {
+            return true;
+        }
+        return false;
+    }
+
+    void draw(Canvas canvas, Paint paint) {
         // Don't run this code if ArrayList has nothing in it
         if (!segmentLocations.isEmpty()) {
             // All the code from this method goes here
